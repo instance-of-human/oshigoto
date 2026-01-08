@@ -10,7 +10,6 @@ struct Cli {
     #[arg(short, long, value_name = "FILE")]
     tasks_path: PathBuf,
 
-
     #[command(subcommand)]
     command: Option<Commands>,
 }
@@ -33,7 +32,6 @@ enum Commands {
         #[arg(short, long)]
         name: String,
     },
-
 }
 
 fn main() {
@@ -47,7 +45,7 @@ fn main() {
         }
     };
 
-    let tasks: Vec<String> = match serde_json::from_str(&data){
+    let tasks: Vec<String> = match serde_json::from_str(&data) {
         Ok(data) => data,
         Err(_) => {
             println!("Could not parse the file !");
@@ -58,21 +56,14 @@ fn main() {
     match &cli.command {
         Some(Commands::List {}) => {
             println!("Current tasks list: ");
-            for task in &tasks{
+            for task in &tasks {
                 println!("- {task}");
             }
         }
-        Some(Commands::Add { name }) => {
-
-        }
-        Some(Commands::Remove { name }) => {
-
-        }
+        Some(Commands::Add { name }) => {}
+        Some(Commands::Remove { name }) => {}
         None => {
             println!("Not action were selected!");
         }
     }
-
-
-
 }
