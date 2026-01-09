@@ -35,8 +35,17 @@ enum Commands {
     },
 }
 
-fn write_to_file(&file_path: PathBuf, tasks: Vec<String){
-    
+fn write_to_file(file_path: &PathBuf, tasks: Vec<String>){
+    match File::create(file_path){
+        Ok(mut file) => {
+            let json_data = serde_json::to_string_pretty(&tasks).unwrap();
+            file.write_all(json_data.as_bytes()).unwrap();
+        },
+        Err(e) => {
+            println!("Error while reading the file!");
+            return;
+        }
+    };
 }
 
 fn main() {
@@ -66,24 +75,19 @@ fn main() {
             }
         }
         Some(Commands::Add { name }) => {
-
             tasks.push(name.to_string());
-
-            match File::create(&cli.tasks_path){
-                Ok(mut file) => {
-                    let json_data = serde_json::to_string_pretty(&tasks).unwrap();
-                    file.write_all(json_data.as_bytes()).unwrap();
-                    },
-                Err(e) => {
-                    println!("Error while reading the file!");
-                    return;
-                }
-            };
-
-
-
+            write_to_file(&cli.tasks_path, tasks)
         }
         Some(Commands::Remove { name }) => {
+            match tasks.iter().position(|x| *x == name.to_string()){
+                Some(index) => {
+                    tasks.remove(index);
+                    write_to_file(&cli.tasks_path, tasks)
+                }
+                None => {
+                    println!("No such tusk in a list !")
+                }
+            };
         }
         None => {
             println!("Not action were selected!");
