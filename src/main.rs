@@ -1,4 +1,5 @@
-use std::fs;
+use std::{fs, io::Write};
+use std::fs::File;
 
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -34,10 +35,14 @@ enum Commands {
     },
 }
 
+fn write_to_file(&file_path: PathBuf, tasks: Vec<String){
+    
+}
+
 fn main() {
     let cli = Cli::parse();
 
-    let data: String = match fs::read_to_string(cli.tasks_path) {
+    let data: String = match fs::read_to_string(&cli.tasks_path) {
         Ok(data) => data,
         Err(_) => {
             println!("Could not read the file !");
@@ -45,7 +50,7 @@ fn main() {
         }
     };
 
-    let tasks: Vec<String> = match serde_json::from_str(&data) {
+    let mut tasks: Vec<String> = match serde_json::from_str(&data) {
         Ok(data) => data,
         Err(_) => {
             println!("Could not parse the file !");
@@ -60,8 +65,26 @@ fn main() {
                 println!("- {task}");
             }
         }
-        Some(Commands::Add { name }) => {}
-        Some(Commands::Remove { name }) => {}
+        Some(Commands::Add { name }) => {
+
+            tasks.push(name.to_string());
+
+            match File::create(&cli.tasks_path){
+                Ok(mut file) => {
+                    let json_data = serde_json::to_string_pretty(&tasks).unwrap();
+                    file.write_all(json_data.as_bytes()).unwrap();
+                    },
+                Err(e) => {
+                    println!("Error while reading the file!");
+                    return;
+                }
+            };
+
+
+
+        }
+        Some(Commands::Remove { name }) => {
+        }
         None => {
             println!("Not action were selected!");
         }
