@@ -1,5 +1,5 @@
-use std::{fs, io::Write};
 use std::fs::File;
+use std::{fs, io::Write};
 
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
@@ -35,15 +35,14 @@ enum Commands {
     },
 }
 
-fn write_to_file(file_path: &PathBuf, tasks: Vec<String>){
-    match File::create(file_path){
+fn write_to_file(file_path: &PathBuf, tasks: Vec<String>) {
+    match File::create(file_path) {
         Ok(mut file) => {
             let json_data = serde_json::to_string_pretty(&tasks).unwrap();
             file.write_all(json_data.as_bytes()).unwrap();
-        },
+        }
         Err(e) => {
-            println!("Error while reading the file!");
-            return;
+            panic!("Could not read the file ! - {e}");
         }
     };
 }
@@ -53,17 +52,15 @@ fn main() {
 
     let data: String = match fs::read_to_string(&cli.tasks_path) {
         Ok(data) => data,
-        Err(_) => {
-            println!("Could not read the file !");
-            return;
+        Err(e) => {
+            panic!("Could not read the file ! - {e}");
         }
     };
 
     let mut tasks: Vec<String> = match serde_json::from_str(&data) {
         Ok(data) => data,
-        Err(_) => {
-            println!("Could not parse the file !");
-            return;
+        Err(e) => {
+            panic!("Could not read the file ! - {e}");
         }
     };
 
@@ -79,7 +76,7 @@ fn main() {
             write_to_file(&cli.tasks_path, tasks)
         }
         Some(Commands::Remove { name }) => {
-            match tasks.iter().position(|x| *x == name.to_string()){
+            match tasks.iter().position(|x| x == name) {
                 Some(index) => {
                     tasks.remove(index);
                     write_to_file(&cli.tasks_path, tasks)
