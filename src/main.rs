@@ -37,62 +37,54 @@ enum Commands {
     },
 }
 
-fn write_to_file(file_path: &PathBuf, tasks: Vec<String>) {
-    match File::create(file_path) {
-        Ok(mut file) => {
-            let json_data = serde_json::to_string_pretty(&tasks).unwrap();
-            file.write_all(json_data.as_bytes()).unwrap();
-        }
-        Err(e) => {
-            panic!("Could not read the file ! - {e}");
-        }
-    };
+fn write_to_file(file_path: &PathBuf, tasks: Vec<String>) -> Result<()> {
+    let mut file: File = File::create(file_path)?;
+    let json_data = serde_json::to_string_pretty(&tasks)?;
+    file.write_all(json_data.as_bytes())?;
+    Ok(())
 }
+
+fn print_tasks(tasks: &Vec<String>)
 
 fn main() -> Result<()> {
     let cli = Cli::parse();
+    let data: String = fs::read_to_string(&cli.tasks_path)?;
+    let mut tasks: Vec<String> = serde_json::from_str(&data)?;
 
-    let data: String = match fs::read_to_string(&cli.tasks_path) {
-        Ok(data) => data,
-        Err(e) => {
-            panic!("Could not read the file ! - {e}");
-        }
-    };
-
-    let mut tasks: Vec<String> = match serde_json::from_str(&data) {
-        Ok(data) => data,
-        Err(e) => {
-            panic!("Could not read the file ! - {e}");
-        }
-    };
-
-    match &cli.command {
-        Some(Commands::List {}) => {
-            println!("Current tasks list: ");
-            for task in &tasks {
-                println!("- {task}");
-            }
-        }
-        Some(Commands::Add { name }) => {
-            tasks.push(name.to_string());
-            write_to_file(&cli.tasks_path, tasks)
-        }
-        Some(Commands::Remove { name }) => {
-            match tasks.iter().position(|x| x == name) {
-                Some(index) => {
-                    tasks.remove(index);
-                    write_to_file(&cli.tasks_path, tasks)
-                }
-                None => {
-                    println!("No such tusk in a list !")
-                }
-            };
-        }
-        None => {
-            println!("Not action were selected!");
-        }
+    match &cli.command{
+        Some(Commands::List {}) => {}
+        Some(Commands::Add { name }) => {}
+        Some(Commands::Remove { name }) => {}
+        None => {}
     }
 
-    Ok()
+    // match &cli.command {
+    //     Some(Commands::List {}) => {
+    //         println!("Current tasks list: ");
+    //         for task in &tasks {
+    //             println!("- {task}");
+    //         }
+    //     }
+    //     Some(Commands::Add { name }) => {
+    //         tasks.push(name.to_string());
+    //         write_to_file(&cli.tasks_path, tasks)
+    //     }
+    //     Some(Commands::Remove { name }) => {
+    //         match tasks.iter().position(|x| x == name) {
+    //             Some(index) => {
+    //                 tasks.remove(index);
+    //                 write_to_file(&cli.tasks_path, tasks)
+    //             }
+    //             None => {
+    //                 println!("No such tusk in a list !")
+    //             }
+    //         };
+    //     }
+    //     None => {
+    //         println!("Not action were selected!");
+    //     }
+    // }
+
+    Ok(())
 
 }
