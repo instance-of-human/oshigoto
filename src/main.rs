@@ -4,6 +4,8 @@ use std::{fs, io::Write};
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
+use anyhow::{Context, Result};
+
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 struct Cli {
@@ -47,7 +49,7 @@ fn write_to_file(file_path: &PathBuf, tasks: Vec<String>) {
     };
 }
 
-fn main() {
+fn main() -> Result<()> {
     let cli = Cli::parse();
 
     let data: String = match fs::read_to_string(&cli.tasks_path) {
@@ -90,4 +92,7 @@ fn main() {
             println!("Not action were selected!");
         }
     }
+
+    Ok()
+
 }
